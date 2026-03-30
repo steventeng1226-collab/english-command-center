@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>English Command Center</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --card: #ffffff;
+      --muted: #94a3b8;
+      --text: #0f172a;
+      --line: #e5e7eb;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --orange: #ea580c;
+      --orange-soft: #ffedd5;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+      --gray-soft: #f3f4f6;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.15);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      color: #111827;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 14px 12px 18px;
+    }
+
+    .shell {
+      background: #f8fafc;
+      border-radius: 26px;
+      min-height: calc(100vh - 32px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top {
+      padding: 16px 16px 10px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.1px;
+      color: #111827;
+    }
+
+    .version {
+      margin-top: 6px;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .main {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid #edf2f7;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+      padding: 12px;
+    }
+
+    .today {
+      padding: 12px;
+    }
+
+    .today-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .today-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .today-score {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .pill-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .pill {
+      border: 0;
+      border-radius: 11px;
+      background: #f3f4f6;
+      padding: 7px 6px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+      cursor: pointer;
+      line-height: 1.15;
+    }
+
+    .pill:hover { filter: brightness(0.98); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .feature {
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .feature-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .emoji {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .count-badge {
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 5px 8px;
+      white-space: nowrap;
+    }
+
+    .feature h3 {
+      margin: 10px 0 4px;
+      font-size: 15px;
+      color: #111827;
+    }
+
+    .feature p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.4;
+      color: #64748b;
+    }
+
+    .feature-footer {
+      margin-top: 10px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mini-tag {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #f8fafc;
+      color: #475569;
+      border: 1px solid #e5e7eb;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .ghost-btn, .solid-btn, .soft-btn, .danger-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 10px;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .ghost-btn { background: #f3f4f6; color: #111827; }
+    .solid-btn { background: var(--blue); color: white; }
+    .soft-btn { background: var(--blue-soft); color: #1d4ed8; }
+    .danger-btn { background: var(--red-soft); color: var(--red); }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .section-title span {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .hidden { display: none !important; }
+
+    textarea, input, select {
+      width: 100%;
+      border: 1px solid #dbe2ea;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+
+    textarea:focus, input:focus, select:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .result-box {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .metrics {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .metric {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+      max-height: 270px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .item {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .item-word {
+      font-size: 15px;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .item-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .chip-btn {
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      color: #334155;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .chip-btn.active-star { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+    .chip-btn.active-hard { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+    .chip-btn.active-known { background: #dcfce7; color: #15803d; border-color: #86efac; }
+
+    .small {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .mode-btn {
+      border: 1px solid #dbe2ea;
+      background: #fff;
+      color: #334155;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #93c5fd;
+    }
+
+    .prompt-preview {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.45;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    .floating-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 30;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 360px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 390px) {
+      .app { padding: 10px 8px 14px; }
+      h1 { font-size: 23px; }
+      .grid { gap: 8px; }
+      .card, .today { padding: 10px; }
+      .pill { font-size: 11px; padding: 8px 4px; }
+      .feature { min-height: 110px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <div class="top">
+        <h1>English Command Center</h1>
+        <div class="version" id="versionText">V2.1 ｜ Updated: 2026-03-30</div>
+      </div>
+
+      <div class="main" id="homeView">
+        <div class="card today">
+          <div class="today-head">
+            <div class="today-title">Today <span id="today-fire">🔥0</span></div>
+            <div class="today-score" id="todayPercent">0%</div>
+          </div>
+          <div class="pill-row">
+            <button class="pill" onclick="openSection('vocab')" id="todayWordBtn">單字 0/10</button>
+            <button class="pill" onclick="openSection('phrases')" id="todayPhraseBtn">片語 0/5</button>
+            <button class="pill" onclick="showFsiModeModal()" id="todayFsiBtn">FSI 0/5</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card feature" onclick="openSection('email')">
+            <div>
+              <div class="feature-top">
+                <div class="emoji">📩</div>
+                <div class="count-badge">新單字 <span id="newWordSummary">0</span></div>
+              </div>
+              <h3>Email 分析</h3>
+            </div>
+            <div class="feature-footer">
+              <span class="mini-tag">清除</span>
+              <span class="mini-tag">貼上</span>
+              <span class="mini-tag">新增統計</span>
+            </div>
+          </div>
+
+          <div class="card feature" onclick="showFsiModeModal()">
+            <div>
+              <div class="feature-top">
+                <div class="emoji">🎯</div>
+                <div class="count-badge">目前 <span id="fsiCountBadge">0</span> 組</div>
+              </div>
+              <h3>FSI 練習</h3>
+            </div>
+            <div class="feature-footer">
+              <span class="mini-tag">簡單</span>
+              <span class="mini-tag">困難</span>
+              <span class="mini-tag">完整句</span>
+            </div>
+          </div>
+
+          <div class="card feature" onclick="openSection('vocab')">
+            <div>
+              <div class="feature-top">
+                <div class="emoji">📘</div>
+                <div class="count-badge"><span id="wordCountBadge">0</span> 個單字</div>
+              </div>
+              <h3>單字庫</h3>
+            </div>
+            <div class="feature-footer">
+              <span class="mini-tag">詞性</span>
+              <span class="mini-tag">隨機</span>
+              <span class="mini-tag">困難優先</span>
+            </div>
+          </div>
+
+          <div class="card feature" onclick="openSection('phrases')">
+            <div>
+              <div class="feature-top">
+                <div class="emoji">📚</div>
+                <div class="count-badge"><span id="phraseCountBadge">0</span> 個片語</div>
+              </div>
+              <h3>片語庫</h3>
+            </div>
+            <div class="feature-footer">
+              <span class="mini-tag">例句</span>
+              <span class="mini-tag">發音</span>
+              <span class="mini-tag">收藏</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h2>快速操作</h2>
+            <span>單頁完成</span>
+          </div>
+          <div class="quick-actions">
+            <button class="ghost-btn" onclick="openSection('import')">資料管理</button>
+            <button class="ghost-btn" onclick="resetToday()">重置 Today</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="main hidden" id="emailView">
+        <div class="card">
+          <div class="section-title">
+            <h2>📩 Email 分析</h2>
+            <span onclick="goHome()" style="cursor:pointer">返回首頁</span>
+          </div>
+          <div class="toolbar">
+            <button class="ghost-btn" onclick="pasteTo('emailInput')">貼上</button>
+            <button class="danger-btn" onclick="clearField('emailInput')">清除</button>
+            <button class="solid-btn" onclick="analyzeEmail()">開始分析</button>
+          </div>
+          <div class="small" style="margin-bottom:8px;">建議貼 1~2 段重點內容；系統最多分析前 3000 字。</div>
+          <textarea id="emailInput" placeholder="貼上 email 或會議逐字稿內容..."></textarea>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h2>分析結果</h2>
+            <span id="analysisStatus">尚未分析</span>
+          </div>
+          <div class="result-box">
+            <div class="metrics">
+              <div class="metric">新單字：<span id="metricNewWords">0</span></div>
+              <div class="metric">已存在：<span id="metricExistingWords">0</span></div>
+              <div class="metric">新片語：<span id="metricNewPhrases">0</span></div>
+            </div>
+            <div class="small" style="margin-bottom:8px;">下方結果為示範型本地分析，可再依你的資料格式繼續強化。</div>
+            <div class="list" id="analysisList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="main hidden" id="importView">
+        <div class="card">
+          <div class="section-title">
+            <h2>📥 單字匯入</h2>
+            <span onclick="goHome()" style="cursor:pointer">返回首頁</span>
+          </div>
+          <div class="small" style="margin-bottom:8px;">格式支援：capacity ／ yield | 良率 ／ allocate | 分配 | v.</div>
+          <div class="toolbar">
+            <button class="ghost-btn" onclick="pasteTo('wordImport')">貼上</button>
+            <button class="danger-btn" onclick="clearField('wordImport')">清除</button>
+            <button class="solid-btn" onclick="importWords()">匯入單字</button>
+          </div>
+          <textarea id="wordImport" placeholder="請貼上單字資料..."></textarea>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h2>📥 母句型匯入</h2>
+            <span>手動標記難度</span>
+          </div>
+          <div class="small" style="margin-bottom:8px;">支援兩種格式：<br>1. [simple] 母句｜下一行提示詞（逗號或 / 分隔），空行分下一組<br>2. [hard] 母句｜下一行提示詞（逗號或 / 分隔），空行分下一組</div>
+          <div class="toolbar">
+            <button class="ghost-btn" onclick="pasteTo('fsiImport')">貼上</button>
+            <button class="danger-btn" onclick="clearField('fsiImport')">清除</button>
+            <button class="solid-btn" onclick="importFsi()">匯入 FSI</button>
+          </div>
+          <textarea id="fsiImport" placeholder="[simple] We need to identify the ___.&#10;root cause, issue, bottleneck, gap&#10;&#10;[hard] The ___ is ___ target, mainly because ___. So we need to ___. We can do this by ___.&#10;yield / below / process variation / improve the yield / optimizing the process"></textarea>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h2>💾 資料備份</h2>
+            <span>避免資料遺失</span>
+          </div>
+          <div class="toolbar">
+            <button class="solid-btn" onclick="exportData()">匯出全部資料</button>
+            <button class="ghost-btn" onclick="importBackup()">匯入備份資料</button>
+          </div>
+          <div class="small">匯出為 JSON 檔（含單字 / 片語 / FSI / Today / settings）</div>
+        </div>
+      </div>
+
+      <div class="main hidden" id="vocabView">
+        <div class="card">
+          <div class="section-title">
+            <h2>📘 單字庫</h2>
+            <span onclick="goHome()" style="cursor:pointer">返回首頁</span>
+          </div>
+          <div class="toolbar">
+            <button class="ghost-btn" onclick="renderWords('priority')">困難優先</button>
+            <button class="ghost-btn" onclick="renderWords('random')">加權隨機</button>
+            <button class="ghost-btn" onclick="renderWords('hardOnly')">只看困難</button>
+          </div>
+          <div class="list" id="wordList"></div>
+        </div>
+      </div>
+
+      <div class="main hidden" id="phrasesView">
+        <div class="card">
+          <div class="section-title">
+            <h2>📚 片語庫</h2>
+            <span onclick="goHome()" style="cursor:pointer">返回首頁</span>
+          </div>
+          <div class="list" id="phraseList"></div>
+        </div>
+      </div>
+
+      <div class="main hidden" id="fsiView">
+        <div class="card">
+          <div class="section-title">
+            <h2>🎯 FSI 練習</h2>
+            <span onclick="goHome()" style="cursor:pointer">返回首頁</span>
+          </div>
+          <div class="mode-switch">
+            <button class="mode-btn active" id="simpleModeBtn" onclick="setFsiMode('simple')">簡單模式</button>
+            <button class="mode-btn" id="hardModeBtn" onclick="setFsiMode('hard')">困難模式</button>
+          </div>
+          <div class="result-box">
+            <div class="small" id="fsiModeHint">簡單模式：顯示母句與提示詞預覽。</div>
+            <div class="list" id="fsiList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-modal hidden" id="fsiModal">
+    <div class="modal-box">
+      <div class="modal-title">選擇 FSI 模式</div>
+      <div class="modal-actions">
+        <button class="soft-btn" onclick="closeFsiModeModal(); setFsiMode('simple'); openSection('fsi');">簡單</button>
+        <button class="solid-btn" onclick="closeFsiModeModal(); setFsiMode('hard'); openSection('fsi');">困難</button>
+      </div>
+      <div style="margin-top:10px; text-align:center;">
+        <button class="ghost-btn" onclick="closeFsiModeModal()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ecc_v2_data';
+
+    const dictZh = {
+      capacity: '產能', yield: '良率', shipment: '出貨', process: '製程', quality: '品質',
+      efficiency: '效率', inventory: '庫存', cost: '成本', allocate: '分配', allocation: '分配',
+      bottleneck: '瓶頸', schedule: '時程', delay: '延遲', improve: '改善', action: '行動',
+      corrective: '矯正的', constraint: '限制', data: '資料', issue: '問題', follow: '跟進',
+      risk: '風險', resource: '資源', target: '目標', defect: '缺點', output: '產出'
+    };
+
+    const dictPos = {
+      capacity: 'n.', yield: 'n.', shipment: 'n.', process: 'n.', quality: 'n.', efficiency: 'n.',
+      inventory: 'n.', cost: 'n.', allocate: 'v.', allocation: 'n.', bottleneck: 'n.', schedule: 'n.',
+      delay: 'n./v.', improve: 'v.', action: 'n.', corrective: 'adj.', constraint: 'n.',
+      data: 'n.', issue: 'n.', follow: 'v.', risk: 'n.', resource: 'n.', target: 'n.', defect: 'n.', output: 'n.'
+    };
+
+    let state = loadState() || {
+      words: [
+        { id: uid(), en: 'capacity', zh: '產能', pos: 'n.', star: false, hard: true, known: false },
+        { id: uid(), en: 'yield', zh: '良率', pos: 'n.', star: true, hard: true, known: false },
+        { id: uid(), en: 'allocate', zh: '分配', pos: 'v.', star: false, hard: false, known: false }
+      ],
+      phrases: [
+        { id: uid(), phrase: 'on track', zh: '按計畫進行', sentence: 'The project is on track.', star: false, hard: false, known: false },
+        { id: uid(), phrase: 'take corrective action', zh: '採取矯正措施', sentence: 'We need to take corrective action immediately.', star: true, hard: false, known: false },
+        { id: uid(), phrase: 'due to capacity constraints', zh: '由於產能限制', sentence: 'The shipment is delayed due to capacity constraints.', star: false, hard: true, known: false }
+      ],
+      fsi: [
+        { id: uid(), mode: 'simple', base: 'We need to improve the ___.', prompts: ['cost', 'quality', 'efficiency'], answer: 'We need to improve the cost.', done: false, known: false },
+        { id: uid(), mode: 'simple', base: 'We need to check the ___.', prompts: ['schedule', 'data', 'inventory', 'quality'], answer: 'We need to check the schedule.', done: false, known: false },
+        { id: uid(), mode: 'hard', base: 'The ___ is ___ target, mainly because ___. So we need to ___. We can do this by ___.', prompts: ['yield', 'below', 'process variation', 'improve the yield', 'optimizing the process'], answer: 'The yield is below target, mainly because process variation. So we need to improve the yield. We can do this by optimizing the process.', done: false, known: false },
+        { id: uid(), mode: 'hard', base: 'We need to ___ the ___ to reduce ___.', prompts: ['optimize', 'process', 'cost', 'streamline', 'workflow'], answer: 'We need to optimize the process to reduce cost.', done: false, known: false }
+      ],
+      today: { word: 0, phrase: 0, fsi: 0, wordTarget: 10, phraseTarget: 5, fsiTarget: 5 },
+      stats: { lastNewWords: 0 },
+      settings: { fsiMode: 'simple', version: 'V2.1', updated: '2026-03-30' }
+    };
+
+    function uid() { return Math.random().toString(36).slice(2, 10); }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getTodayDate() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function initTodayFire() {
+      const today = getTodayDate();
+      const savedDate = localStorage.getItem('today_date');
+      if (savedDate !== today) {
+        localStorage.setItem('today_date', today);
+        localStorage.setItem('today_done', 'false');
+      }
+      updateTodayFire();
+    }
+
+    function updateTodayFire() {
+      const done = localStorage.getItem('today_done') === 'true';
+      const el = document.getElementById('today-fire');
+      if (el) el.textContent = done ? '🔥1' : '🔥0';
+    }
+
+    function completeTodayFromFsi() {
+      const done = localStorage.getItem('today_done') === 'true';
+      if (!done) {
+        localStorage.setItem('today_done', 'true');
+        updateTodayFire();
+      }
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) {
+        alert('此裝置不支援語音播放');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en-US';
+      utter.rate = 0.92;
+      utter.pitch = 1;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function goHome() {
+      ['home','email','import','vocab','phrases','fsi'].forEach(k => {
+        const el = document.getElementById(k + 'View');
+        if (el) el.classList.add('hidden');
+      });
+      document.getElementById('homeView').classList.remove('hidden');
+      renderAll();
+    }
+
+    function openSection(name) {
+      ['home','email','import','vocab','phrases','fsi'].forEach(k => {
+        const el = document.getElementById(k + 'View');
+        if (el) el.classList.add('hidden');
+      });
+      document.getElementById(name + 'View').classList.remove('hidden');
+      if (name === 'vocab') renderWords('priority');
+      if (name === 'phrases') renderPhrases();
+      if (name === 'fsi') renderFsi();
+    }
+
+    function showFsiModeModal() {
+      document.getElementById('fsiModal').classList.remove('hidden');
+    }
+
+    function closeFsiModeModal() {
+      document.getElementById('fsiModal').classList.add('hidden');
+    }
+
+    function setFsiMode(mode) {
+      state.settings.fsiMode = mode;
+      saveState();
+      document.getElementById('simpleModeBtn').classList.toggle('active', mode === 'simple');
+      document.getElementById('hardModeBtn').classList.toggle('active', mode === 'hard');
+      document.getElementById('fsiModeHint').textContent = mode === 'simple'
+        ? '簡單模式：顯示母句與提示詞預覽。'
+        : '困難模式：每題預設只顯示 2 個提示詞，並可播放完整句。';
+      renderFsi();
+    }
+
+    async function pasteTo(id) {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById(id).value = text;
+      } catch (e) {
+        alert('無法直接貼上，請長按或手動貼上。');
+      }
+    }
+
+    function clearField(id) {
+      document.getElementById(id).value = '';
+    }
+
+    function analyzeEmail() {
+      const input = document.getElementById('emailInput').value.trim();
+      const list = document.getElementById('analysisList');
+      list.innerHTML = '';
+      if (!input) {
+        document.getElementById('analysisStatus').textContent = '請先貼上內容';
+        return;
+      }
+
+      const rawInput = input.slice(0, 3000);
+      const stopWords = ['the','and','is','are','to','of','in','for','on','with','a','an','by','be','we','it','this','that','as','at','or','from','our','your','was','were','will','can','could','should','would','have','has','had','but','not','if','please','need'];
+      const tokens = [...new Set((rawInput.match(/[A-Za-z][A-Za-z-]{2,}/g) || []).map(x => x.toLowerCase()).filter(x => !stopWords.includes(x)))];
+      const phrasesFound = [];
+      state.phrases.forEach(p => {
+        if (rawInput.toLowerCase().includes(p.phrase.toLowerCase())) phrasesFound.push(p);
+      });
+
+      let newWords = 0;
+      let existingWords = 0;
+      tokens.slice(0, 6).forEach(token => {
+        const exists = state.words.some(w => w.en.toLowerCase() === token);
+        if (exists) {
+          existingWords++;
+        } else {
+          const newWord = {
+            id: uid(),
+            en: token,
+            zh: dictZh[token] || '',
+            pos: dictPos[token] || '',
+            star: false,
+            hard: false,
+            known: false
+          };
+          state.words.push(newWord);
+          newWords++;
+        }
+      });
+
+      state.stats.lastNewWords = newWords;
+      saveState();
+
+      document.getElementById('metricNewWords').textContent = newWords;
+      document.getElementById('metricExistingWords').textContent = existingWords;
+      document.getElementById('metricNewPhrases').textContent = phrasesFound.length;
+      document.getElementById('analysisStatus').textContent = `完成分析｜新增 ${newWords} 個新單字｜分析前 ${rawInput.length} 字`;
+
+      tokens.slice(0, 8).forEach(token => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        const isNew = !state.words.slice(0, state.words.length - newWords).some(w => w.en.toLowerCase() === token);
+        item.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-word">${token}</div>
+              <div class="item-sub">${dictZh[token] || '（可後續補中文）'} ${dictPos[token] ? '｜ ' + dictPos[token] : ''}</div>
+            </div>
+            <div class="count-badge">${isNew ? 'NEW' : 'EXISTING'}</div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      phrasesFound.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-word">${p.phrase}</div>
+              <div class="item-sub">${p.zh}<br>${p.sentence}</div>
+            </div>
+            <div class="count-badge">PHRASE</div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+
+      renderAll();
+    }
+
+    function importWords() {
+      const raw = document.getElementById('wordImport').value.trim();
+      if (!raw) return;
+      raw.split(/\n+/).forEach(line => {
+        const parts = line.split('|').map(s => s.trim()).filter(Boolean);
+        if (!parts.length) return;
+        const en = (parts[0] || '').toLowerCase();
+        if (!en) return;
+        if (state.words.some(w => w.en.toLowerCase() === en)) return;
+        state.words.push({
+          id: uid(),
+          en,
+          zh: parts[1] || dictZh[en] || '',
+          pos: parts[2] || dictPos[en] || '',
+          star: false,
+          hard: false,
+          known: false
+        });
+      });
+      saveState();
+      renderAll();
+      alert('單字匯入完成');
+    }
+
+    function importFsi() {
+      const raw = document.getElementById('fsiImport').value.trim();
+      if (!raw) return;
+
+      const blocks = raw.split(/\n\s*\n+/).map(s => s.trim()).filter(Boolean);
+      let added = 0;
+
+      blocks.forEach(block => {
+        const lines = block.split(/\n+/).map(s => s.trim()).filter(Boolean);
+        if (lines.length < 2) return;
+
+        let firstLine = lines[0];
+        let mode = 'simple';
+        const mark = firstLine.match(/^\[(hard|simple)\]\s*/i);
+        if (mark) {
+          mode = mark[1].toLowerCase();
+          firstLine = firstLine.replace(/^\[(hard|simple)\]\s*/i, '').trim();
+        }
+
+        const base = firstLine;
+        const promptsLine = lines.slice(1).join(' ');
+        const prompts = promptsLine.split(/[\/,，]/).map(s => s.trim()).filter(Boolean);
+        if (!base || !prompts.length) return;
+
+        state.fsi.push({
+          id: uid(),
+          mode,
+          base,
+          prompts,
+          answer: buildAnswer(base, prompts, mode),
+          done: false,
+          known: false
+        });
+        added += 1;
+      });
+
+      saveState();
+      renderAll();
+      alert(`FSI 匯入完成：新增 ${added} 組`);
+    }
+
+    function buildAnswer(base, prompts, mode) {
+      let text = base;
+      const fillCount = mode === 'hard' ? Math.min(5, prompts.length) : Math.min(1, prompts.length);
+      for (let i = 0; i < fillCount; i++) {
+        text = text.replace('___', prompts[i]);
+      }
+      return text;
+    }
+
+    function weightedShuffle(items) {
+      return [...items]
+        .map(item => ({ item, score: Math.random() * (item.hard ? 0.35 : item.star ? 0.7 : 1.2) }))
+        .sort((a, b) => a.score - b.score)
+        .map(x => x.item);
+    }
+
+    function renderWords(mode = 'priority') {
+      const wrap = document.getElementById('wordList');
+      wrap.innerHTML = '';
+      let items = state.words.filter(w => !w.known);
+      if (mode === 'priority') {
+        items = [...items].sort((a, b) => Number(b.hard) - Number(a.hard) || Number(b.star) - Number(a.star));
+      } else if (mode === 'random') {
+        items = weightedShuffle(items);
+      } else if (mode === 'hardOnly') {
+        items = items.filter(w => w.hard);
+      }
+
+      items.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-word">${w.en}</div>
+              <div class="item-sub">${w.zh || '（可補中文）'} ${w.pos ? '｜ ' + w.pos : ''}</div>
+            </div>
+            <button class="chip-btn" onclick="speak('${escapeQuote(w.en)}')">🔊 發音</button>
+          </div>
+          <div class="actions">
+            <button class="chip-btn ${w.star ? 'active-star' : ''}" onclick="toggleWord('${w.id}','star')">⭐ 收藏</button>
+            <button class="chip-btn ${w.hard ? 'active-hard' : ''}" onclick="toggleWord('${w.id}','hard')">🔥 困難</button>
+            <button class="chip-btn ${w.known ? 'active-known' : ''}" onclick="toggleWord('${w.id}','known')">✅ 熟悉後不再顯示</button>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function toggleWord(id, key) {
+      const item = state.words.find(w => w.id === id);
+      if (!item) return;
+      item[key] = !item[key];
+      saveState();
+      renderWords('priority');
+      renderAll();
+    }
+
+    function renderPhrases() {
+      const wrap = document.getElementById('phraseList');
+      wrap.innerHTML = '';
+      state.phrases.filter(p => !p.known).forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-word">${p.phrase}</div>
+              <div class="item-sub">${p.zh}<br>${p.sentence}</div>
+            </div>
+            <button class="chip-btn" onclick="speak('${escapeQuote(p.sentence)}')">🔊 整句</button>
+          </div>
+          <div class="actions">
+            <button class="chip-btn ${p.star ? 'active-star' : ''}" onclick="togglePhrase('${p.id}','star')">⭐ 收藏</button>
+            <button class="chip-btn ${p.hard ? 'active-hard' : ''}" onclick="togglePhrase('${p.id}','hard')">🔥 困難</button>
+            <button class="chip-btn ${p.known ? 'active-known' : ''}" onclick="togglePhrase('${p.id}','known')">✅ 熟悉</button>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function togglePhrase(id, key) {
+      const item = state.phrases.find(p => p.id === id);
+      if (!item) return;
+      item[key] = !item[key];
+      saveState();
+      renderPhrases();
+      renderAll();
+    }
+
+    function renderFsi() {
+      const wrap = document.getElementById('fsiList');
+      wrap.innerHTML = '';
+      const mode = state.settings.fsiMode || 'simple';
+      let items = state.fsi.filter(f => f.mode === mode && !f.known);
+
+      items = [...items].sort((a, b) => {
+        const aDone = a.done ? 1 : 0;
+        const bDone = b.done ? 1 : 0;
+        if (aDone !== bDone) return aDone - bDone;
+        return Math.random() - 0.5;
+      });
+
+      items.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        const preview = mode === 'simple'
+          ? f.prompts.join(' / ')
+          : f.prompts.slice(0, 2).join(' / ');
+        const extra = mode === 'simple'
+          ? `<div class="prompt-preview">${preview}</div>`
+          : `<div class="prompt-preview">本題提示詞：${preview}</div>`;
+        div.innerHTML = `
+          <div class="item-top">
+            <div style="flex:1;">
+              <div class="item-word">${f.base}</div>
+              ${extra}
+              <div class="small" style="margin-top:8px;">${mode === 'simple' ? '簡單型提示詞直接顯示於母句下方。' : '困難型預設只顯示 2 個提示詞。'}${f.done ? '｜已練習' : ''}</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="chip-btn" onclick="speak('${escapeQuote(f.answer)}')">🔊 完整句</button>
+            <button class="chip-btn" onclick="markTodayFsi('${f.id}')">✔ 完成 1 組</button>
+            <button class="chip-btn ${f.known ? 'active-known' : ''}" onclick="toggleFsiKnown('${f.id}')">✅ 熟悉後隱藏</button>
+          </div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function markTodayFsi(id) {
+      const item = state.fsi.find(f => f.id === id);
+      if (item) item.done = true;
+      if (state.today.fsi < state.today.fsiTarget) state.today.fsi += 1;
+      completeTodayFromFsi();
+      saveState();
+      renderAll();
+      renderFsi();
+    }
+
+    function toggleFsiKnown(id) {
+      const item = state.fsi.find(f => f.id === id);
+      if (!item) return;
+      item.known = !item.known;
+      saveState();
+      renderFsi();
+      renderAll();
+    }
+
+    function resetToday() {
+      state.today.word = 0;
+      state.today.phrase = 0;
+      state.today.fsi = 0;
+      localStorage.setItem('today_done', 'false');
+      saveState();
+      updateTodayFire();
+      renderAll();
+    }
+
+    function calcTodayPercent() {
+      const done = state.today.word + state.today.phrase + state.today.fsi;
+      const total = state.today.wordTarget + state.today.phraseTarget + state.today.fsiTarget;
+      return total ? Math.round((done / total) * 100) : 0;
+    }
+
+    function exportData() {
+      try {
+        const dataStr = JSON.stringify(state, null, 2);
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const filename = `english-command-center-backup-${yyyy}-${mm}-${dd}-${hh}${mi}.json`;
+
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+        alert(`匯出成功\n檔名：${filename}\n位置：下載資料夾`);
+      } catch (err) {
+        alert('匯出失敗');
+      }
+    }
+
+    function importBackup() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+
+      input.onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+
+            if (!data || !Array.isArray(data.words) || !Array.isArray(data.phrases) || !Array.isArray(data.fsi)) {
+              alert('檔案格式錯誤');
+              return;
+            }
+
+            const ok = confirm('這會覆蓋目前所有資料，確定要匯入嗎？');
+            if (!ok) return;
+
+            state = data;
+
+            if (!state.today) {
+              state.today = { word: 0, phrase: 0, fsi: 0, wordTarget: 10, phraseTarget: 5, fsiTarget: 5 };
+            }
+            if (!state.stats) {
+              state.stats = { lastNewWords: 0 };
+            }
+            if (!state.settings) {
+              state.settings = { fsiMode: 'simple', version: 'V2.1', updated: '2026-03-30' };
+            }
+
+            saveState();
+            renderAll();
+            alert('匯入完成');
+          } catch (err) {
+            alert('匯入失敗：JSON 格式錯誤');
+          }
+        };
+
+        reader.readAsText(file, 'utf-8');
+      };
+
+      input.click();
+    }
+
+    function renderAll() {
+      document.getElementById('versionText').textContent = `${state.settings.version} ｜ Updated: ${state.settings.updated}`;
+      document.getElementById('wordCountBadge').textContent = state.words.filter(w => !w.known).length;
+      document.getElementById('phraseCountBadge').textContent = state.phrases.filter(p => !p.known).length;
+      document.getElementById('fsiCountBadge').textContent = state.fsi.length;
+      document.getElementById('newWordSummary').textContent = state.stats.lastNewWords;
+
+      const pct = calcTodayPercent();
+      const pctEl = document.getElementById('todayPercent');
+      pctEl.textContent = pct + '%';
+      pctEl.style.color = pct < 30 ? '#64748b' : pct < 70 ? '#2563eb' : '#16a34a';
+
+      document.getElementById('todayWordBtn').textContent = `單字 ${state.today.word}/${state.today.wordTarget}`;
+      document.getElementById('todayPhraseBtn').textContent = `片語 ${state.today.phrase}/${state.today.phraseTarget}`;
+      document.getElementById('todayFsiBtn').textContent = `FSI ${state.today.fsi}/${state.today.fsiTarget}`;
+
+      updateTodayFire();
+
+      if (!document.getElementById('vocabView').classList.contains('hidden')) renderWords('priority');
+      if (!document.getElementById('phrasesView').classList.contains('hidden')) renderPhrases();
+      if (!document.getElementById('fsiView').classList.contains('hidden')) renderFsi();
+    }
+
+    function escapeQuote(str) {
+      return String(str).replace(/'/g, "\\'").replace(/\n/g, ' ');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'fsiModal') closeFsiModeModal();
+    });
+
+    initTodayFire();
+    renderAll();
+    setFsiMode(state.settings.fsiMode || 'simple');
+  </script>
+</body>
+</html>
