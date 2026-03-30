@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>English Command Center</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       --bg: #0f172a;
@@ -42,7 +45,7 @@
     .pill-row, .grid, .quick-actions, .mode-switch { display: grid; gap: 8px; }
     .pill-row { grid-template-columns: repeat(3, 1fr); }
     .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .quick-actions { grid-template-columns: repeat(3, 1fr); }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); }
     .mode-switch { grid-template-columns: 1fr 1fr; }
     .pill, .ghost-btn, .solid-btn, .soft-btn, .danger-btn, .mode-btn {
       border: 0; border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 800; cursor: pointer;
@@ -64,11 +67,12 @@
     .feature h3 { margin: 10px 0 4px; font-size: 15px; color: #111827; }
     .feature p, .small { margin: 0; font-size: 12px; line-height: 1.4; color: #64748b; }
     .feature-footer, .toolbar, .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .feature-footer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
     .mini-tag, .chip-btn {
       border: 1px solid #e5e7eb; background: #fff; color: #334155;
       border-radius: 999px; padding: 6px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
     }
-    .mini-tag { background: #f8fafc; color: #475569; border-radius: 999px; padding: 4px 7px; font-size: 10px; }
+    .mini-tag { background: #f8fafc; color: #475569; border-radius: 999px; padding: 4px 3px; font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .chip-btn.active-star { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
     .chip-btn.active-hard { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
     .chip-btn.active-known { background: #dcfce7; color: #15803d; border-color: #86efac; }
@@ -115,13 +119,12 @@
       <div class="top">
         <h1>English Command Center</h1>
         <div class="version" id="versionText">V2.2 ｜ Updated: 2026-03-30</div>
-        <div class="subline">Email → Vocabulary → Phrases → FSI</div>
       </div>
 
       <div class="main" id="homeView">
         <div class="card">
           <div class="today-head">
-            <div class="today-title">Today</div>
+            <div class="today-title">Today <span id="today-fire">🔥0</span></div>
             <div class="today-score" id="todayPercent">0%</div>
           </div>
           <div class="pill-row">
@@ -139,7 +142,6 @@
                 <div class="count-badge">新單字 <span id="newWordSummary">0</span></div>
               </div>
               <h3>Email 分析</h3>
-              <p>貼上重點內容，抓新單字與片語。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">清除</span><span class="mini-tag">貼上</span><span class="mini-tag">新增統計</span></div>
           </div>
@@ -151,7 +153,6 @@
                 <div class="count-badge">目前 <span id="fsiCountBadge">0</span> 組</div>
               </div>
               <h3>FSI 練習</h3>
-              <p>簡單 / 困難分開，支援完整句語音。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">簡單</span><span class="mini-tag">困難</span><span class="mini-tag">完整句</span></div>
           </div>
@@ -163,7 +164,6 @@
                 <div class="count-badge"><span id="wordCountBadge">0</span> 個單字</div>
               </div>
               <h3>單字庫</h3>
-              <p>詞性、自動補中文、困難優先。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">詞性</span><span class="mini-tag">隨機</span><span class="mini-tag">困難優先</span></div>
           </div>
@@ -175,7 +175,6 @@
                 <div class="count-badge"><span id="phraseCountBadge">0</span> 個片語</div>
               </div>
               <h3>片語庫</h3>
-              <p>片語＋中文＋完整句，直接練輸出。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">例句</span><span class="mini-tag">發音</span><span class="mini-tag">收藏</span></div>
           </div>
@@ -185,12 +184,9 @@
           <div class="section-title"><h2>快速操作</h2><span>單頁完成</span></div>
           <div class="quick-actions">
             <button class="ghost-btn" onclick="openSection('import')">匯入資料</button>
-            <button class="ghost-btn" onclick="showFsiModeModal()">開始 FSI</button>
             <button class="ghost-btn" onclick="resetToday()">重置 Today</button>
           </div>
         </div>
-
-        <div class="footer-note">首頁只做決策，不堆長內容。</div>
       </div>
 
       <div class="main hidden" id="emailView">
@@ -231,22 +227,18 @@
         </div>
 
         <div class="card">
-          <div class="section-title"><h2>📥 母句型匯入</h2><span>支援單行與多行</span></div>
+          <div class="section-title"><h2>📥 母句型匯入</h2><span>單行 pipe 格式</span></div>
           <div class="toolbar">
             <button class="ghost-btn" onclick="pasteTo('fsiImport')">貼上</button>
             <button class="danger-btn" onclick="clearField('fsiImport')">清除</button>
             <button class="solid-btn" onclick="importFsi()">匯入 FSI</button>
           </div>
-          <div class="hint-box">支援三種格式：
-1) simple | We need to improve the ___. | quality / yield / efficiency
-2) hard | The ___ is ___ target... | yield / below / process variation / improve the yield / optimizing the process
-3) 多行格式：
-We need to improve the ___.
-quality / yield / efficiency
+          <div class="hint-box">唯一支援格式：
+ simple | 母句 | 提示詞1 / 提示詞2 / 提示詞3
+ hard | 母句 | 提示詞1 / 提示詞2 / 提示詞3
 
-The ___ is ___ target...
-yield / below / process variation / improve the yield / optimizing the process</div>
-          <textarea id="fsiImport" placeholder="可直接貼上 simple | ... | ... 或 母句 + 提示詞 的多行內容"></textarea>
+沒標記難度時，預設為 simple。</div>
+          <textarea id="fsiImport" placeholder="simple | We need to improve the ___. | quality / yield / efficiency&#10;hard | The ___ is ___ target, mainly because ___. So we need to ___. We can do this by ___. | delivery / below / production delay / increase the capacity / adding overtime"></textarea>
         </div>
 
         <div class="card">
@@ -360,6 +352,35 @@ yield / below / process variation / improve the yield / optimizing the process</
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+
+    function getTodayDate() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function initTodayFire() {
+      const today = getTodayDate();
+      const savedDate = localStorage.getItem('today_date');
+      if (savedDate !== today) {
+        localStorage.setItem('today_date', today);
+        localStorage.setItem('today_done', 'false');
+      }
+      updateTodayFire();
+    }
+
+    function updateTodayFire() {
+      const done = localStorage.getItem('today_done') === 'true';
+      const el = document.getElementById('today-fire');
+      if (el) el.textContent = done ? '🔥1' : '🔥0';
+    }
+
+    function completeTodayFromFsi() {
+      if (localStorage.getItem('today_done') !== 'true') {
+        localStorage.setItem('today_done', 'true');
+        updateTodayFire();
+      }
     }
 
     function speak(text) {
@@ -562,45 +583,83 @@ yield / below / process variation / improve the yield / optimizing the process</
         return;
       }
 
+      const lines = raw.split(/\n+/).map(line => line.trim()).filter(Boolean);
       let success = 0;
-      const blocks = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+      let fail = 0;
+      const failMsg = [];
 
-      blocks.forEach(block => {
-        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-        if (!lines.length) return;
+      lines.forEach((line, index) => {
+        const parts = line.split('|').map(s => s.trim());
 
-        if (lines.every(line => line.includes('|'))) {
-          lines.forEach(line => {
-            const parts = line.split('|').map(s => s.trim());
-            if (parts.length >= 3) {
-              const mode = parts[0].toLowerCase() === 'hard' ? 'hard' : 'simple';
-              const base = parts[1];
-              const prompts = parts.slice(2).join('|').split('/').map(s => s.trim()).filter(Boolean);
-              if (pushFsiItem(mode, base, prompts)) success++;
-            }
-          });
+        let mode = 'simple';
+        let base = '';
+        let promptText = '';
+
+        if (parts.length === 3) {
+          if (/^(simple|hard)$/i.test(parts[0])) {
+            mode = parts[0].toLowerCase();
+            base = parts[1];
+            promptText = parts[2];
+          } else {
+            fail++;
+            failMsg.push(`第 ${index + 1} 行難度必須是 simple 或 hard`);
+            return;
+          }
+        } else if (parts.length === 2) {
+          base = parts[0];
+          promptText = parts[1];
+        } else {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行格式錯誤，應為 simple | 母句 | 提示詞`);
           return;
         }
 
-        if (lines.length === 2 && !lines[0].includes('|')) {
-          const base = lines[0];
-          const prompts = lines[1].split(/[\/,]/).map(s => s.trim()).filter(Boolean);
-          const mode = base.includes('So we need to') || base.includes('We can do this by') ? 'hard' : 'simple';
-          if (pushFsiItem(mode, base, prompts)) success++;
+        if (!base) {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行缺少母句`);
           return;
         }
 
-        const base = lines[0];
-        const mode = base.includes('So we need to') || base.includes('We can do this by') ? 'hard' : 'simple';
-        lines.slice(1).forEach(line => {
-          const prompts = line.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
-          if (pushFsiItem(mode, base, prompts)) success++;
+        const prompts = promptText.split('/').map(s => s.trim()).filter(Boolean);
+        if (!prompts.length) {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行缺少提示詞`);
+          return;
+        }
+
+        const exists = state.fsi.some(item =>
+          item.mode === mode &&
+          item.base.trim() === base.trim() &&
+          JSON.stringify(item.prompts) === JSON.stringify(prompts)
+        );
+        if (exists) {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行重複，未匯入`);
+          return;
+        }
+
+        state.fsi.push({
+          id: uid(),
+          mode,
+          base: base.trim(),
+          prompts,
+          answer: buildAnswer(base.trim(), prompts, mode),
+          done: false,
+          known: false
         });
+        success++;
       });
 
       saveState();
       renderAll();
-      alert(`FSI 匯入完成\n成功：${success} 組`);
+
+      let msg = `FSI 匯入完成
+成功：${success} 組
+失敗：${fail} 組`;
+      if (failMsg.length) msg += `
+
+${failMsg.join('\\n')}`;
+      alert(msg);
     }
 
     function weightedShuffle(items) {
@@ -675,6 +734,7 @@ yield / below / process variation / improve the yield / optimizing the process</
 
     function markTodayFsi() {
       if (state.today.fsi < state.today.fsiTarget) state.today.fsi += 1;
+      completeTodayFromFsi();
       saveState();
       renderAll();
     }
@@ -683,7 +743,9 @@ yield / below / process variation / improve the yield / optimizing the process</
       state.today.word = 0;
       state.today.phrase = 0;
       state.today.fsi = 0;
+      localStorage.setItem('today_done', 'false');
       saveState();
+      updateTodayFire();
       renderAll();
     }
 
@@ -694,11 +756,17 @@ yield / below / process variation / improve the yield / optimizing the process</
     }
 
     function exportData() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const filename = `ECC_backup_${yyyy}-${mm}-${dd}.json`;
+
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'english_command_center_backup.json';
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -733,6 +801,7 @@ yield / below / process variation / improve the yield / optimizing the process</
       document.getElementById('todayWordBtn').textContent = `單字 ${state.today.word}/${state.today.wordTarget}`;
       document.getElementById('todayPhraseBtn').textContent = `片語 ${state.today.phrase}/${state.today.phraseTarget}`;
       document.getElementById('todayFsiBtn').textContent = `FSI ${state.today.fsi}/${state.today.fsiTarget}`;
+      updateTodayFire();
 
       if (!document.getElementById('vocabView').classList.contains('hidden')) renderWords('priority');
       if (!document.getElementById('phrasesView').classList.contains('hidden')) renderPhrases();
@@ -751,6 +820,7 @@ yield / below / process variation / improve the yield / optimizing the process</
       if (e.target.id === 'fsiModal') closeFsiModeModal();
     });
 
+    initTodayFire();
     renderAll();
     setFsiMode(state.settings.fsiMode || 'simple');
   </script>
