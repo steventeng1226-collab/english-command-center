@@ -108,6 +108,11 @@
     .modal-title { font-size: 16px; font-weight: 800; color: #111827; margin-bottom: 10px; text-align: center; }
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .footer-note { text-align: center; font-size: 11px; color: #94a3b8; padding: 4px 0 2px; }
+
+    .analysis-status-new { background: #eef2ff; color: #3730a3; }
+    .analysis-status-existing { background: #f3f4f6; color: #475569; }
+    .analysis-add-btn { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .analysis-added-btn { background: #dcfce7; color: #15803d; border-color: #86efac; }
     .hint-box {
       background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8;
       border-radius: 12px; padding: 10px 12px; font-size: 12px; line-height: 1.5; white-space: pre-wrap;
@@ -119,7 +124,7 @@
     <div class="shell">
       <div class="top">
         <h1>English Command Center</h1>
-        <div class="version" id="versionText">V2.2 ｜ Updated: 2026-03-30</div>
+        <div class="version" id="versionText">V2.3 ｜ Updated: 2026-03-30</div>
       </div>
 
       <div class="main" id="homeView">
@@ -194,7 +199,7 @@
         <div class="card">
           <div class="section-title"><h2>📩 Email 分析</h2><span onclick="goHome()" style="cursor:pointer">返回首頁</span></div>
           <div class="toolbar">
-            <button class="ghost-btn" onclick="pasteTo('emailInput')">貼上</button>
+            <button class="ghost-btn" onclick="pasteTo('emailInput')">讀取剪貼簿</button>
             <button class="danger-btn" onclick="clearField('emailInput')">清除</button>
             <button class="solid-btn" onclick="analyzeEmail()">開始分析</button>
           </div>
@@ -206,11 +211,11 @@
           <div class="section-title"><h2>分析結果</h2><span id="analysisStatus">尚未分析</span></div>
           <div class="result-box">
             <div class="metrics">
-              <div class="metric">新單字：<span id="metricNewWords">0</span></div>
+              <div class="metric">候選新單字：<span id="metricNewWords">0</span></div>
               <div class="metric">已存在：<span id="metricExistingWords">0</span></div>
               <div class="metric">新片語：<span id="metricNewPhrases">0</span></div>
             </div>
-            <div class="small" style="margin-bottom:8px;">下方結果為示範型本地分析。</div>
+            <div class="small" style="margin-bottom:8px;">下方結果會先比對單字庫；新單字需你手動加入。</div>
             <div class="list" id="analysisList"></div>
           </div>
         </div>
@@ -340,7 +345,7 @@ hard | The ___ is ___ target, mainly because ___. So we need to ___. We can do t
       ],
       today: { word: 3, phrase: 1, fsi: 2, wordTarget: 10, phraseTarget: 5, fsiTarget: 5 },
       stats: { lastNewWords: 0 },
-      settings: { fsiMode: 'simple', version: 'V2.2', updated: '2026-03-30' }
+      settings: { fsiMode: 'simple', version: 'V2.3', updated: '2026-03-30' }
     };
 
     normalizeState();
@@ -507,34 +512,27 @@ hard | The ___ is ___ target, mainly because ___. So we need to ___. We can do t
       }
 
       const rawInput = input.slice(0, 3000);
-      const stopWords = ['the','and','is','are','to','of','in','for','on','with','a','an','by','be','we','it','this','that','as','at','or','from','our','your','was','were','will','can','could','should','would','have','has','had','but','not','if','please','need'];
-      const tokens = [...new Set((rawInput.match(/[A-Za-z][A-Za-z-]{2,}/g) || []).map(x => x.toLowerCase()).filter(x => !stopWords.includes(x)))];
+      const stopWords = ['the','and','is','are','to','of','in','for','on','with','a','an','by','be','we','it','this','that','as','at','or','from','our','your','was','were','will','can','could','should','would','have','has','had','but','not','if','please','need','you','does','do','did','done','he','she','they','them','their','there','here','what','which','who','whom','whose','when','where','why','how','i','me','my','mine','us','am','pm','too','also','than','then','into','out','up','down','over','under','more','most','very','about','include','includes','including'];
+      const tokens = [...new Set(
+        (rawInput.match(/[A-Za-z][A-Za-z-]{2,}/g) || [])
+          .map(x => x.toLowerCase())
+          .filter(x => x.length >= 3 && !stopWords.includes(x))
+      )];
+
       const phrasesFound = [];
       state.phrases.forEach(p => {
         if (rawInput.toLowerCase().includes(p.phrase.toLowerCase())) phrasesFound.push(p);
       });
 
-      let newWords = 0;
-      let existingWords = 0;
-      const existingSetBefore = new Set(state.words.map(w => w.en.toLowerCase()));
+      const existingSet = new Set(state.words.map(w => w.en.toLowerCase()));
+      const candidates = tokens.slice(0, 20).map(token => ({
+        token,
+        exists: existingSet.has(token),
+        addedNow: false
+      }));
 
-      tokens.slice(0, 6).forEach(token => {
-        const exists = existingSetBefore.has(token);
-        if (exists) {
-          existingWords++;
-        } else {
-          state.words.push({
-            id: uid(),
-            en: token,
-            zh: dictZh[token] || '',
-            pos: dictPos[token] || '',
-            star: false,
-            hard: false,
-            known: false
-          });
-          newWords++;
-        }
-      });
+      const newWords = candidates.filter(x => !x.exists).length;
+      const existingWords = candidates.filter(x => x.exists).length;
 
       state.stats.lastNewWords = newWords;
       saveState();
@@ -542,23 +540,80 @@ hard | The ___ is ___ target, mainly because ___. So we need to ___. We can do t
       document.getElementById('metricNewWords').textContent = newWords;
       document.getElementById('metricExistingWords').textContent = existingWords;
       document.getElementById('metricNewPhrases').textContent = phrasesFound.length;
-      document.getElementById('analysisStatus').textContent = `完成分析｜新增 ${newWords} 個新單字｜分析前 ${rawInput.length} 字`;
+      document.getElementById('analysisStatus').textContent = `完成分析｜候選 ${newWords} 個新單字｜分析前 ${rawInput.length} 字`;
 
-      tokens.slice(0, 8).forEach(token => {
+      candidates.forEach(({token, exists}) => {
         const item = document.createElement('div');
         item.className = 'item';
-        const isNew = !existingSetBefore.has(token);
-        item.innerHTML = `<div class="item-top"><div><div class="item-word">${escapeHtml(token)}</div><div class="item-sub">${escapeHtml(dictZh[token] || '（可後續補中文）')} ${dictPos[token] ? '｜ ' + escapeHtml(dictPos[token]) : ''}</div></div><div class="count-badge">${isNew ? 'NEW' : 'EXISTING'}</div></div>`;
+        const statusClass = exists ? 'analysis-status-existing' : 'analysis-status-new';
+        const statusText = exists ? '已存在' : 'NEW';
+        const actionHtml = exists
+          ? ''
+          : `<button class="chip-btn analysis-add-btn" id="add-btn-${escapeAttr(token)}" onclick="addAnalyzedWord('${escapeJs(token)}')">＋加入</button>`;
+        item.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-word">${escapeHtml(token)}</div>
+              <div class="item-sub">${escapeHtml(dictZh[token] || '（可後續補中文）')} ${dictPos[token] ? '｜ ' + escapeHtml(dictPos[token]) : ''}</div>
+            </div>
+            <div class="actions">
+              <div class="count-badge ${statusClass}" id="status-${escapeAttr(token)}">${statusText}</div>
+              ${actionHtml}
+            </div>
+          </div>
+        `;
         list.appendChild(item);
       });
 
       phrasesFound.forEach(p => {
         const item = document.createElement('div');
         item.className = 'item';
-        item.innerHTML = `<div class="item-top"><div><div class="item-word">${escapeHtml(p.phrase)}</div><div class="item-sub">${escapeHtml(p.zh)}\n${escapeHtml(p.sentence)}</div></div><div class="count-badge">PHRASE</div></div>`;
+        item.innerHTML = `
+          <div class="item-top">
+            <div>
+              <div class="item-word">${escapeHtml(p.phrase)}</div>
+              <div class="item-sub">${escapeHtml(p.zh)}
+${escapeHtml(p.sentence)}</div>
+            </div>
+            <div class="count-badge">PHRASE</div>
+          </div>
+        `;
         list.appendChild(item);
       });
 
+      renderAll();
+    }
+
+    function addAnalyzedWord(token) {
+      const lower = String(token || '').toLowerCase().trim();
+      if (!lower) return;
+      if (!state.words.some(w => w.en.toLowerCase() === lower)) {
+        state.words.push({
+          id: uid(),
+          en: lower,
+          zh: dictZh[lower] || '',
+          pos: dictPos[lower] || '',
+          star: false,
+          hard: false,
+          known: false,
+          knownUntil: null,
+          completed: false
+        });
+        saveState();
+      }
+      const statusEl = document.getElementById(`status-${escapeAttr(lower)}`);
+      if (statusEl) {
+        statusEl.textContent = '已加入';
+        statusEl.classList.remove('analysis-status-new');
+        statusEl.classList.add('analysis-status-existing');
+      }
+      const btnEl = document.getElementById(`add-btn-${escapeAttr(lower)}`);
+      if (btnEl) {
+        btnEl.textContent = '✓ 已加入';
+        btnEl.disabled = true;
+        btnEl.classList.remove('analysis-add-btn');
+        btnEl.classList.add('analysis-added-btn');
+      }
       renderAll();
     }
 
@@ -859,6 +914,10 @@ hard | The ___ is ___ target, mainly because ___. So we need to ___. We can do t
 
     function escapeHtml(str) {
       return String(str || '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    }
+
+    function escapeAttr(str) {
+      return String(str || '').replaceAll(/[^a-zA-Z0-9_-]/g, '-');
     }
 
     function escapeJs(str) {
