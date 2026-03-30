@@ -45,7 +45,7 @@
     .pill-row, .grid, .quick-actions, .mode-switch { display: grid; gap: 8px; }
     .pill-row { grid-template-columns: repeat(3, 1fr); }
     .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .quick-actions { grid-template-columns: repeat(3, 1fr); }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); }
     .mode-switch { grid-template-columns: 1fr 1fr; }
     .pill, .ghost-btn, .solid-btn, .soft-btn, .danger-btn, .mode-btn {
       border: 0; border-radius: 12px; padding: 10px; font-size: 12px; font-weight: 800; cursor: pointer;
@@ -67,11 +67,13 @@
     .feature h3 { margin: 10px 0 4px; font-size: 15px; color: #111827; }
     .feature p, .small { margin: 0; font-size: 12px; line-height: 1.4; color: #64748b; }
     .feature-footer, .toolbar, .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .feature-footer { gap: 4px; }
     .mini-tag, .chip-btn {
       border: 1px solid #e5e7eb; background: #fff; color: #334155;
-      border-radius: 999px; padding: 6px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
+      border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 800; cursor: pointer;
+      white-space: nowrap;
     }
-    .mini-tag { background: #f8fafc; color: #475569; border-radius: 999px; padding: 4px 7px; font-size: 10px; }
+    .mini-tag { background: #f8fafc; color: #475569; border-radius: 999px; padding: 4px 6px; font-size: 10px; }
     .chip-btn.active-star { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
     .chip-btn.active-hard { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
     .chip-btn.active-known { background: #dcfce7; color: #15803d; border-color: #86efac; }
@@ -118,13 +120,12 @@
       <div class="top">
         <h1>English Command Center</h1>
         <div class="version" id="versionText">V2.2 ｜ Updated: 2026-03-30</div>
-        <div class="subline">Email → Vocabulary → Phrases → FSI</div>
       </div>
 
       <div class="main" id="homeView">
         <div class="card">
           <div class="today-head">
-            <div class="today-title">Today</div>
+            <div class="today-title">Today <span id="today-fire">🔥0</span></div>
             <div class="today-score" id="todayPercent">0%</div>
           </div>
           <div class="pill-row">
@@ -142,7 +143,6 @@
                 <div class="count-badge">新單字 <span id="newWordSummary">0</span></div>
               </div>
               <h3>Email 分析</h3>
-              <p>貼上重點內容，抓新單字與片語。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">清除</span><span class="mini-tag">貼上</span><span class="mini-tag">新增統計</span></div>
           </div>
@@ -154,7 +154,6 @@
                 <div class="count-badge">目前 <span id="fsiCountBadge">0</span> 組</div>
               </div>
               <h3>FSI 練習</h3>
-              <p>簡單 / 困難分開，支援完整句語音。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">簡單</span><span class="mini-tag">困難</span><span class="mini-tag">完整句</span></div>
           </div>
@@ -166,7 +165,6 @@
                 <div class="count-badge"><span id="wordCountBadge">0</span> 個單字</div>
               </div>
               <h3>單字庫</h3>
-              <p>詞性、自動補中文、困難優先。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">詞性</span><span class="mini-tag">隨機</span><span class="mini-tag">困難優先</span></div>
           </div>
@@ -178,7 +176,6 @@
                 <div class="count-badge"><span id="phraseCountBadge">0</span> 個片語</div>
               </div>
               <h3>片語庫</h3>
-              <p>片語＋中文＋完整句，直接練輸出。</p>
             </div>
             <div class="feature-footer"><span class="mini-tag">例句</span><span class="mini-tag">發音</span><span class="mini-tag">收藏</span></div>
           </div>
@@ -188,12 +185,9 @@
           <div class="section-title"><h2>快速操作</h2><span>單頁完成</span></div>
           <div class="quick-actions">
             <button class="ghost-btn" onclick="openSection('import')">匯入資料</button>
-            <button class="ghost-btn" onclick="showFsiModeModal()">開始 FSI</button>
-            <button class="ghost-btn" onclick="resetToday()">重置 Today</button>
+                        <button class="ghost-btn" onclick="resetToday()">重置 Today</button>
           </div>
         </div>
-
-        <div class="footer-note">首頁只做決策，不堆長內容。</div>
       </div>
 
       <div class="main hidden" id="emailView">
@@ -234,22 +228,21 @@
         </div>
 
         <div class="card">
-          <div class="section-title"><h2>📥 母句型匯入</h2><span>支援單行與多行</span></div>
+          <div class="section-title"><h2>📥 母句型匯入</h2><span>單行 pipe 格式</span></div>
           <div class="toolbar">
             <button class="ghost-btn" onclick="pasteTo('fsiImport')">貼上</button>
             <button class="danger-btn" onclick="clearField('fsiImport')">清除</button>
             <button class="solid-btn" onclick="importFsi()">匯入 FSI</button>
           </div>
-          <div class="hint-box">支援三種格式：
-1) simple | We need to improve the ___. | quality / yield / efficiency
-2) hard | The ___ is ___ target... | yield / below / process variation / improve the yield / optimizing the process
-3) 多行格式：
-We need to improve the ___.
-quality / yield / efficiency
+          <div class="hint-box">唯一支援格式：
+simple | We need to improve the ___. | quality / yield / efficiency
+hard | The ___ is ___ target, mainly because ___. So we need to ___. We can do this by ___. | cost / above / silver price increase / reduce the cost / reducing waste
 
-The ___ is ___ target...
-yield / below / process variation / improve the yield / optimizing the process</div>
-          <textarea id="fsiImport" placeholder="可直接貼上 simple | ... | ... 或 母句 + 提示詞 的多行內容"></textarea>
+規則：
+1) 一行 = 一組
+2) 用 | 分隔欄位
+3) 沒標記難度時，預設 simple</div>
+          <textarea id="fsiImport" placeholder="simple | We need to improve the ___. | quality / yield / efficiency"></textarea>
         </div>
 
         <div class="card">
@@ -331,9 +324,9 @@ yield / below / process variation / improve the yield / optimizing the process</
 
     let state = loadState() || {
       words: [
-        { id: uid(), en: 'capacity', zh: '產能', pos: 'n.', star: false, hard: true, known: false, knownUntil: null },
-        { id: uid(), en: 'yield', zh: '良率', pos: 'n.', star: true, hard: true, known: false, knownUntil: null },
-        { id: uid(), en: 'allocate', zh: '分配', pos: 'v.', star: false, hard: false, known: false, knownUntil: null }
+        { id: uid(), en: 'capacity', zh: '產能', pos: 'n.', star: false, hard: true, known: false },
+        { id: uid(), en: 'yield', zh: '良率', pos: 'n.', star: true, hard: true, known: false },
+        { id: uid(), en: 'allocate', zh: '分配', pos: 'v.', star: false, hard: false, known: false }
       ],
       phrases: [
         { id: uid(), phrase: 'on track', zh: '按計畫進行', sentence: 'The project is on track.', star: false, hard: false, known: false },
@@ -341,14 +334,80 @@ yield / below / process variation / improve the yield / optimizing the process</
         { id: uid(), phrase: 'due to capacity constraints', zh: '由於產能限制', sentence: 'The shipment is delayed due to capacity constraints.', star: false, hard: true, known: false }
       ],
       fsi: [
-        { id: uid(), mode: 'simple', base: 'We need to improve the ___.', prompts: ['cost', 'quality', 'efficiency'], answer: 'We need to improve the cost.', known: false, knownUntil: null, completed: false },
-        { id: uid(), mode: 'simple', base: 'We need to check the ___.', prompts: ['schedule', 'data', 'inventory', 'quality'], answer: 'We need to check the schedule.', known: false, knownUntil: null, completed: false },
-        { id: uid(), mode: 'hard', base: 'The ___ is ___ target, mainly because ___. So we need to ___. We can do this by ___.', prompts: ['yield', 'below', 'process variation', 'improve the yield', 'optimizing the process'], answer: 'The yield is below target, mainly because process variation. So we need to improve the yield. We can do this by optimizing the process.', known: false, knownUntil: null, completed: false }
+        { id: uid(), mode: 'simple', base: 'We need to improve the ___.', prompts: ['cost', 'quality', 'efficiency'], answer: 'We need to improve the cost.' },
+        { id: uid(), mode: 'simple', base: 'We need to check the ___.', prompts: ['schedule', 'data', 'inventory', 'quality'], answer: 'We need to check the schedule.' },
+        { id: uid(), mode: 'hard', base: 'The ___ is ___ target, mainly because ___. So we need to ___. We can do this by ___.', prompts: ['yield', 'below', 'process variation', 'improve the yield', 'optimizing the process'], answer: 'The yield is below target, mainly because process variation. So we need to improve the yield. We can do this by optimizing the process.' }
       ],
       today: { word: 3, phrase: 1, fsi: 2, wordTarget: 10, phraseTarget: 5, fsiTarget: 5 },
       stats: { lastNewWords: 0 },
       settings: { fsiMode: 'simple', version: 'V2.2', updated: '2026-03-30' }
     };
+
+    normalizeState();
+
+    function normalizeState() {
+      const now = new Date();
+      let changed = false;
+
+      state.words = Array.isArray(state.words) ? state.words : [];
+      state.phrases = Array.isArray(state.phrases) ? state.phrases : [];
+      state.fsi = Array.isArray(state.fsi) ? state.fsi : [];
+
+      state.words.forEach(item => {
+        if (item.star === undefined) { item.star = false; changed = true; }
+        if (item.hard === undefined) { item.hard = false; changed = true; }
+        if (item.known === undefined) { item.known = false; changed = true; }
+        if (item.knownUntil === undefined) { item.knownUntil = null; changed = true; }
+        if (item.completed === undefined) { item.completed = false; changed = true; }
+        if (item.known && item.knownUntil && new Date(item.knownUntil) <= now) {
+          item.known = false; item.knownUntil = null; changed = true;
+        }
+      });
+
+      state.phrases.forEach(item => {
+        if (item.star === undefined) { item.star = false; changed = true; }
+        if (item.hard === undefined) { item.hard = false; changed = true; }
+        if (item.known === undefined) { item.known = false; changed = true; }
+      });
+
+      state.fsi.forEach(item => {
+        if (item.known === undefined) { item.known = false; changed = true; }
+        if (item.knownUntil === undefined) { item.knownUntil = null; changed = true; }
+        if (item.completed === undefined) { item.completed = false; changed = true; }
+        if (item.known && item.knownUntil && new Date(item.knownUntil) <= now) {
+          item.known = false; item.knownUntil = null; changed = true;
+        }
+      });
+
+      if (!state.today) {
+        state.today = { word: 0, phrase: 0, fsi: 0, wordTarget: 10, phraseTarget: 5, fsiTarget: 5 };
+        changed = true;
+      }
+      if (!state.stats) { state.stats = { lastNewWords: 0 }; changed = true; }
+      if (!state.settings) { state.settings = { fsiMode: 'simple', version: 'V2.2', updated: '2026-03-30' }; changed = true; }
+
+      syncTodayFire();
+      if (changed) saveState();
+    }
+
+    function syncTodayFire() {
+      const fireEl = document.getElementById('today-fire');
+      if (!fireEl) return;
+      fireEl.textContent = state.today && state.today.fsi > 0 ? '🔥1' : '🔥0';
+    }
+
+    function setKnownFor7Days(item) {
+      const until = new Date();
+      until.setDate(until.getDate() + 7);
+      item.known = true;
+      item.knownUntil = until.toISOString();
+    }
+
+    function isStillHidden(item) {
+      if (!item || !item.known) return false;
+      if (!item.knownUntil) return true;
+      return new Date(item.knownUntil) > new Date();
+    }
 
     function uid() { return Math.random().toString(36).slice(2, 10); }
 
@@ -364,76 +423,6 @@ yield / below / process variation / improve the yield / optimizing the process</
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
-
-
-    function todayYMD() {
-      const d = new Date();
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
-
-    function addDays(dateStr, days) {
-      const d = new Date(dateStr + 'T00:00:00');
-      d.setDate(d.getDate() + days);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
-
-    function hydrateState() {
-      state.words = (state.words || []).map(item => ({
-        ...item,
-        known: Boolean(item.known),
-        knownUntil: item.knownUntil || null
-      }));
-
-      state.fsi = (state.fsi || []).map(item => ({
-        ...item,
-        known: Boolean(item.known),
-        knownUntil: item.knownUntil || null,
-        completed: Boolean(item.completed)
-      }));
-
-      releaseExpiredKnownItems();
-    }
-
-    function releaseExpiredKnownItems() {
-      const today = todayYMD();
-
-      state.words.forEach(item => {
-        if (item.known && item.knownUntil && item.knownUntil <= today) {
-          item.known = false;
-          item.knownUntil = null;
-        }
-      });
-
-      state.fsi.forEach(item => {
-        if (item.known && item.knownUntil && item.knownUntil <= today) {
-          item.known = false;
-          item.knownUntil = null;
-          item.completed = false;
-        }
-      });
-    }
-
-    function getVisibleWords() {
-      releaseExpiredKnownItems();
-      return state.words.filter(item => !item.known);
-    }
-
-    function getVisibleFsi(mode) {
-      releaseExpiredKnownItems();
-      return state.fsi
-        .filter(item => item.mode === mode && !item.known)
-        .sort((a, b) => {
-          if (a.completed !== b.completed) return a.completed ? 1 : -1;
-          return 0;
-        });
-    }
-
 
     function speak(text) {
       if (!('speechSynthesis' in window)) {
@@ -541,8 +530,7 @@ yield / below / process variation / improve the yield / optimizing the process</
             pos: dictPos[token] || '',
             star: false,
             hard: false,
-            known: false,
-            knownUntil: null
+            known: false
           });
           newWords++;
         }
@@ -594,6 +582,7 @@ yield / below / process variation / improve the yield / optimizing the process</
         });
       });
       saveState();
+      syncTodayFire();
       renderAll();
       alert('單字匯入完成');
     }
@@ -639,45 +628,60 @@ yield / below / process variation / improve the yield / optimizing the process</
         return;
       }
 
+      const lines = raw.split(/\n+/).map(line => line.trim()).filter(Boolean);
       let success = 0;
-      const blocks = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+      let fail = 0;
+      const failMsg = [];
 
-      blocks.forEach(block => {
-        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-        if (!lines.length) return;
+      lines.forEach((line, index) => {
+        const parts = line.split('|').map(s => s.trim()).filter(Boolean);
 
-        if (lines.every(line => line.includes('|'))) {
-          lines.forEach(line => {
-            const parts = line.split('|').map(s => s.trim());
-            if (parts.length >= 3) {
-              const mode = parts[0].toLowerCase() === 'hard' ? 'hard' : 'simple';
-              const base = parts[1];
-              const prompts = parts.slice(2).join('|').split('/').map(s => s.trim()).filter(Boolean);
-              if (pushFsiItem(mode, base, prompts)) success++;
-            }
-          });
+        if (parts.length < 2) {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行格式錯誤：至少需要母句與提示詞`);
           return;
         }
 
-        if (lines.length === 2 && !lines[0].includes('|')) {
-          const base = lines[0];
-          const prompts = lines[1].split(/[\/,]/).map(s => s.trim()).filter(Boolean);
-          const mode = base.includes('So we need to') || base.includes('We can do this by') ? 'hard' : 'simple';
-          if (pushFsiItem(mode, base, prompts)) success++;
+        let mode = 'simple';
+        let base = '';
+        let promptsText = '';
+
+        if (parts.length >= 3 && /^(simple|hard)$/i.test(parts[0])) {
+          mode = parts[0].toLowerCase();
+          base = parts[1];
+          promptsText = parts.slice(2).join('|');
+        } else {
+          base = parts[0];
+          promptsText = parts.slice(1).join('|');
+        }
+
+        if (!base) {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行缺少母句`);
           return;
         }
 
-        const base = lines[0];
-        const mode = base.includes('So we need to') || base.includes('We can do this by') ? 'hard' : 'simple';
-        lines.slice(1).forEach(line => {
-          const prompts = line.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
-          if (pushFsiItem(mode, base, prompts)) success++;
-        });
+        const prompts = promptsText.split(/[\/，,]/).map(s => s.trim()).filter(Boolean);
+        if (!prompts.length) {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行缺少提示詞`);
+          return;
+        }
+
+        const added = pushFsiItem(mode, base, prompts);
+        if (added) success++;
+        else {
+          fail++;
+          failMsg.push(`第 ${index + 1} 行重複或格式無效`);
+        }
       });
 
       saveState();
       renderAll();
-      alert(`FSI 匯入完成\n成功：${success} 組`);
+
+      let msg = `FSI 匯入完成\n成功：${success} 組\n失敗：${fail} 組`;
+      if (failMsg.length) msg += `\n\n${failMsg.join('\n')}`;
+      alert(msg);
     }
 
     function weightedShuffle(items) {
@@ -690,7 +694,7 @@ yield / below / process variation / improve the yield / optimizing the process</
     function renderWords(mode = 'priority') {
       const wrap = document.getElementById('wordList');
       wrap.innerHTML = '';
-      let items = getVisibleWords();
+      let items = state.words.filter(w => !isStillHidden(w));
       if (mode === 'priority') items = [...items].sort((a, b) => Number(b.hard) - Number(a.hard) || Number(b.star) - Number(a.star));
       else if (mode === 'random') items = weightedShuffle(items);
       else if (mode === 'hardOnly') items = items.filter(w => w.hard);
@@ -698,7 +702,7 @@ yield / below / process variation / improve the yield / optimizing the process</
       items.forEach(w => {
         const div = document.createElement('div');
         div.className = 'item';
-        div.innerHTML = `<div class="item-top"><div><div class="item-word">${escapeHtml(w.en)}</div><div class="item-sub">${escapeHtml(w.zh || '（可補中文）')} ${w.pos ? '｜ ' + escapeHtml(w.pos) : ''}</div></div><button class="chip-btn" onclick="speak('${escapeJs(w.en)}')">🔊 發音</button></div><div class="actions"><button class="chip-btn ${w.star ? 'active-star' : ''}" onclick="toggleWord('${w.id}','star')">⭐ 收藏</button><button class="chip-btn ${w.hard ? 'active-hard' : ''}" onclick="toggleWord('${w.id}','hard')">🔥 困難</button><button class="chip-btn ${w.known ? 'active-known' : ''}" onclick="toggleWord('${w.id}','known')">✅ 熟悉後隱藏7天</button></div>`;
+        div.innerHTML = `<div class="item-top"><div><div class="item-word">${escapeHtml(w.en)}</div><div class="item-sub">${escapeHtml(w.zh || '（可補中文）')} ${w.pos ? '｜ ' + escapeHtml(w.pos) : ''}</div></div><button class="chip-btn" onclick="speak('${escapeJs(w.en)}')">🔊 發音</button></div><div class="actions"><button class="chip-btn ${w.star ? 'active-star' : ''}" onclick="toggleWord('${w.id}','star')">⭐ 收藏</button><button class="chip-btn ${w.hard ? 'active-hard' : ''}" onclick="toggleWord('${w.id}','hard')">🔥 困難</button><button class="chip-btn ${isStillHidden(w) ? 'active-known' : ''}" onclick="toggleWord('${w.id}','known')">✅ 熟悉 7 天</button></div>`;
         wrap.appendChild(div);
       });
     }
@@ -706,15 +710,16 @@ yield / below / process variation / improve the yield / optimizing the process</
     function toggleWord(id, key) {
       const item = state.words.find(w => w.id === id);
       if (!item) return;
-
       if (key === 'known') {
-        const next = !item.known;
-        item.known = next;
-        item.knownUntil = next ? addDays(todayYMD(), 7) : null;
+        if (isStillHidden(item)) {
+          item.known = false;
+          item.knownUntil = null;
+        } else {
+          setKnownFor7Days(item);
+        }
       } else {
         item[key] = !item[key];
       }
-
       saveState();
       renderWords('priority');
       renderAll();
@@ -744,16 +749,22 @@ yield / below / process variation / improve the yield / optimizing the process</
       const wrap = document.getElementById('fsiList');
       wrap.innerHTML = '';
       const mode = state.settings.fsiMode || 'simple';
-      const items = getVisibleFsi(mode);
+      let items = state.fsi.filter(f => f.mode === mode && !isStillHidden(f));
+
+      items = [...items].sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        return 0;
+      });
 
       items.forEach(f => {
         const preview = mode === 'simple' ? f.prompts.join(' / ') : f.prompts.slice(0, 2).join(' / ');
         const extra = mode === 'simple'
           ? `<div class="prompt-preview">${escapeHtml(preview)}</div>`
           : `<div class="prompt-preview">本題提示詞：${escapeHtml(preview)}</div>`;
+        const knownLabel = isStillHidden(f) ? '🔁 取消熟悉' : '✅ 熟悉 7 天';
         const div = document.createElement('div');
         div.className = 'item';
-        div.innerHTML = `<div class="item-top"><div style="flex:1;"><div class="item-word">${escapeHtml(f.base)}</div>${extra}<div class="small" style="margin-top:8px;">${mode === 'simple' ? '簡單型提示詞直接顯示於母句下方。' : '困難型預設只顯示 2 個提示詞。'}${f.completed ? '｜已練習' : ''}</div></div></div><div class="actions"><button class="chip-btn" onclick="speak('${escapeJs(f.answer)}')">🔊 完整句</button><button class="chip-btn" onclick="markTodayFsi('${f.id}')">✔ 完成 1 組</button><button class="chip-btn ${f.known ? 'active-known' : ''}" onclick="toggleFsiKnown('${f.id}')">✅ 熟悉後隱藏7天</button></div>`;
+        div.innerHTML = `<div class="item-top"><div style="flex:1;"><div class="item-word">${escapeHtml(f.base)}</div>${extra}<div class="small" style="margin-top:8px;">${mode === 'simple' ? '簡單型提示詞直接顯示於母句下方。' : '困難型預設只顯示 2 個提示詞。'}${f.completed ? '｜已練習' : ''}</div></div></div><div class="actions"><button class="chip-btn" onclick="speak('${escapeJs(f.answer)}')">🔊 完整句</button><button class="chip-btn" onclick="markTodayFsi('${f.id}')">✔ 完成 1 組</button><button class="chip-btn ${isStillHidden(f) ? 'active-known' : ''}" onclick="toggleFsiKnown('${f.id}')">${knownLabel}</button></div>`;
         wrap.appendChild(div);
       });
     }
@@ -770,12 +781,12 @@ yield / below / process variation / improve the yield / optimizing the process</
     function toggleFsiKnown(id) {
       const item = state.fsi.find(f => f.id === id);
       if (!item) return;
-
-      const next = !item.known;
-      item.known = next;
-      item.knownUntil = next ? addDays(todayYMD(), 7) : null;
-      if (next) item.completed = false;
-
+      if (isStillHidden(item)) {
+        item.known = false;
+        item.knownUntil = null;
+      } else {
+        setKnownFor7Days(item);
+      }
       saveState();
       renderFsi();
       renderAll();
@@ -798,9 +809,13 @@ yield / below / process variation / improve the yield / optimizing the process</
     function exportData() {
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ECC_backup_${todayYMD()}.json`;
+      a.download = `ECC_backup_${yyyy}-${mm}-${dd}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -821,10 +836,9 @@ yield / below / process variation / improve the yield / optimizing the process</
     }
 
     function renderAll() {
-      releaseExpiredKnownItems();
       document.getElementById('versionText').textContent = `${state.settings.version} ｜ Updated: ${state.settings.updated}`;
       document.getElementById('wordCountBadge').textContent = state.words.length;
-      document.getElementById('phraseCountBadge').textContent = state.phrases.filter(p => !p.known).length;
+      document.getElementById('phraseCountBadge').textContent = state.phrases.length;
       document.getElementById('fsiCountBadge').textContent = state.fsi.length;
       document.getElementById('newWordSummary').textContent = state.stats.lastNewWords;
 
@@ -837,6 +851,7 @@ yield / below / process variation / improve the yield / optimizing the process</
       document.getElementById('todayPhraseBtn').textContent = `片語 ${state.today.phrase}/${state.today.phraseTarget}`;
       document.getElementById('todayFsiBtn').textContent = `FSI ${state.today.fsi}/${state.today.fsiTarget}`;
 
+      syncTodayFire();
       if (!document.getElementById('vocabView').classList.contains('hidden')) renderWords('priority');
       if (!document.getElementById('phrasesView').classList.contains('hidden')) renderPhrases();
       if (!document.getElementById('fsiView').classList.contains('hidden')) renderFsi();
@@ -854,7 +869,6 @@ yield / below / process variation / improve the yield / optimizing the process</
       if (e.target.id === 'fsiModal') closeFsiModeModal();
     });
 
-    hydrateState();
     renderAll();
     setFsiMode(state.settings.fsiMode || 'simple');
   </script>
